@@ -6,6 +6,9 @@ import 'dart:convert' as convert;
 import 'dart:async';
 import 'dart:ui' as ui;
 import 'BOPState.dart';
+import 'package:flutter/services.dart' show rootBundle;
+
+List<String> assets = ["art_bitcoin-blue", "art_bitcoin-bop"];
 
 Future<void> loadArts(BOPState state, String baseUrl) async {
   var response = await http.get(baseUrl + "/arts.json");
@@ -51,44 +54,41 @@ class Art {
 
   static Future<Art> loadFromUrl({String baseUrl, String name}) async {
     Art art = Art();
-    http.Response response = await http.get(baseUrl + "/" + name);
-    if (response.statusCode == 200) {
-      Map<String, dynamic> artList = (convert.jsonDecode(response.body) as Map).cast<String, dynamic>();
-      artList.forEach((k, val) {
-        switch (k) {
-          case "name":
-            art.name = val as String;
-            break;
-          case "flavour":
-            art.flavour = val as String;
-            break;
-          case "file":
-            art.file = val as String;
-            break;
-          case "height":
-            art.height = val as double;
-            break;
-          case "width":
-            art.width = val as double;
-            break;
-          case "privkey_qr":
-            art.pkQr = readElement(val);
-            break;
-          case "privkey":
-            art.pk = readElement(val);
-            break;
-          case "address_qr":
-            art.adQr = readElement(val);
-            break;
-          case "address":
-            art.ad = readElement(val);
-            break;
-          default:
-        }
-      });
-    } else {
-      print('ART GetArt request failed with status: ${response.statusCode}.');
-    }
+    String artDefinition = await rootBundle.loadString('assets/art-bitcoin-blue.json');
+    // http.Response response = await http.get(baseUrl + "/" + name);
+    Map<String, dynamic> artList = (convert.jsonDecode(response.body) as Map).cast<String, dynamic>();
+    artList.forEach((k, val) {
+      switch (k) {
+        case "name":
+          art.name = val as String;
+          break;
+        case "flavour":
+          art.flavour = val as String;
+          break;
+        case "file":
+          art.file = val as String;
+          break;
+        case "height":
+          art.height = val as double;
+          break;
+        case "width":
+          art.width = val as double;
+          break;
+        case "privkey_qr":
+          art.pkQr = readElement(val);
+          break;
+        case "privkey":
+          art.pk = readElement(val);
+          break;
+        case "address_qr":
+          art.adQr = readElement(val);
+          break;
+        case "address":
+          art.ad = readElement(val);
+          break;
+        default:
+      }
+    });
     String imageFileUrl = baseUrl + "/" + art.file;
     http.Response imgResp = await http.get(imageFileUrl);
     Uint8List bytes = imgResp.bodyBytes; //Uint8List
